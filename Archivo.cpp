@@ -242,7 +242,7 @@ void Archivo::ProcessEvents(Juego &juego, sf::Event &event)
         if (boton1.getGlobalBounds().contains(mousePos))
         {
             SaveDataToFile(m_filename);
-            juego.SetFondo(new Menu());
+            juego.SetFondo(TipoEscena::MENU);
         }
     }
     else if (event.type == sf::Event::KeyPressed)
@@ -250,7 +250,7 @@ void Archivo::ProcessEvents(Juego &juego, sf::Event &event)
         if (event.key.code == sf::Keyboard::Escape)
         {
             SaveDataToFile(m_filename);
-            juego.SetFondo(new Menu());
+            juego.SetFondo(TipoEscena::MENU);
         }
     }
 }
