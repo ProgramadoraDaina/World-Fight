@@ -306,7 +306,7 @@ void Selector::ProcessEvents(Juego &juego, sf::Event &event)
         }
         else if (button2Bounds.contains(mousePos) || event.key.code == sf::Keyboard::Escape)
         {
-            juego.SetFondo(new Menu()); // Botón "Go back" → volver al menú
+            juego.SetFondo(TipoEscena::MENU); // Botón "Go back" → volver al menú
         }
     }
 }
