@@ -180,7 +180,7 @@ void Combate::ProcessEvents(Juego &juego, Event &event)   // Habilitamos el cier
         {
             window_referencia.setView(original);/**restauro la vista original para salir del modo combate y volver a la vista
                                             base*/
-            juego.SetFondo(TipoEscena::MENU);/**creo un objeto de la clase Menu (la pantalla principal del juego) se lo paso al objeto
+            juego.SetFondo(new Menu);/**creo un objeto de la clase Menu (la pantalla principal del juego) se lo paso al objeto
                                   juego para que lo active como la proxima escena*/
         }
     }

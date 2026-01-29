@@ -61,6 +61,8 @@ public:
     void desactivarLockAtaque();
     bool lockAtaqueActivo() const;
     Estado estadoBloqueado() const;
+    void DePie();
+    void agacharse();
 private:
     Estado estado_{Estado::QUIETO};
     float multiplicadorVelocidad(Estado estado) const;

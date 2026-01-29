@@ -1,6 +1,9 @@
 #include <SFML/Graphics.hpp>           // Incluye la librería SFML para gráficos
 #include "Juego.h"                     // Incluye la definición de la clase Juego
-
+#include "Menu.h"
+#include "Archivo.h"
+#include "Instrucciones.h"
+#include "Combate.h"
 // Constructor de la clase Juego
 Juego::Juego(Fondo *s)
     : m_window(sf::VideoMode::getDesktopMode(), "World Fight", sf::Style::Fullscreen),/**Creo la ventana en pantalla completa,
@@ -21,17 +24,6 @@ void Juego::Run() { /**Este es el método principal que corre el bucle del juego*
                    avanzo animaciones, todo lo que corresponde a este frame*/
 
         Draw(); /**Luego dibujo la escena actual en la ventana: fondo, jugadores, HUD, textos, todo*/
-
-        if (m_siguiente_fondo) {/**Chequeo si alguna escena pidió cambiar (por ejemplo, del Menú al Selector, del Combate
-                                al Archivo). Ese pedido se guarda en m_siguiente_fondo*/
-
-            delete m_fondo;/**Primero borro la escena actual para liberar memoria (no dejar fugas)*/
-
-            m_fondo = m_siguiente_fondo;/**Ahora pongo la nueva escena como escena actual (la que se va a actualizar y dibujar
-                                        a partir de este momento)*/
-            m_siguiente_fondo = nullptr;/**Limpio el puntero de la escena ‘pendiente’ porque ya se activó. Así evito
-                                          recambiarla accidentalmente*/
-        }
     }
 }
 // Procesa los eventos de la ventana
@@ -57,12 +49,15 @@ void Juego::Draw() {/**Este método se usa para dibujar todo lo que la escena qui
 
     m_fondo->Draw(m_window);/**Le pido a la escena actual que se dibuje usando la ventana del juego*/
 }
-void Juego::SetFondo(Fondo *siguiente_escena) {/**Este método sirve para solicitar un cambio de escena*/
-    delete m_fondo;
-    m_fondo = siguiente_escena;   /**Guardo el puntero de la nueva escena para que el cambio real se haga al
-                                            final del frame dentro de Run() (es más seguro y evita errores mientras se
-                                             está dibujando/actualizando)*/
-}
+
+void Juego::SetFondo(Fondo* Siguiente_Fondo) {
+    if (m_fondo) {
+        delete m_fondo; // Libera la escena anterior
+        m_fondo = nullptr;
+    }
+    m_fondo = Siguiente_Fondo;
+    }
+
 void Juego::Exit() {/**Método para salir del juego*/
 
     m_window.close();/**Cierro la ventana del juego ahora*/

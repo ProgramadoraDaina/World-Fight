@@ -75,7 +75,7 @@ Instrucciones::Instrucciones()
     m_t5.setPosition(screenAncho - (390.f * uiScale), 120.f * uiScale);
 
     m_t6.setFont(m_f1);
-    m_t6.setString("HADUKEN: Space | I");
+    m_t6.setString("Punio: Space | I");
     m_t6.setCharacterSize(static_cast<unsigned>(12 * uiScale));
     m_t6.setFillColor(Color::White);
     m_t6.setPosition(screenAncho - (390.f * uiScale), 140.f * uiScale);

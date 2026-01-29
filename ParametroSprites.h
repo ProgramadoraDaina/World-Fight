@@ -13,7 +13,6 @@ public:
     void aplicarDireccion(const std::string& nombre, sf::Sprite& sprite, bool izquierda);
     bool miraIzquierda(const sf::Sprite& sprite) const;
     bool miraDerecha(const sf::Sprite& sprite) const;
-    int signoKnockback(const sf::Sprite& sprite) const;
     int direccionHorizontal(const sf::Sprite& sprite) const;
-
+    int getDireccion(const sf::Sprite& sprite) const;
 };

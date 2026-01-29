@@ -264,12 +264,12 @@ void Jugador::Update(Jugador& opponent)
                                           : Keyboard::isKeyPressed(Keyboard::I));/**ataque: patada (F/K) o punio (Space/I)*/
                 if (Keyboard::isKeyPressed(m_down))/**si el jugador está apretando Abajo (m_down), pongo el estado AGACHADO*/
                 {
-                    Agachar();
+                    obj.agacharse();
                 }
                 else if (!presionandoAtaque)/**si no estoy agachándome y no estoy apretando ningún ataque (patada/puño), me
                                             pongo de pie (QUIETO)*/
                 {
-                    Depie();
+                    obj.DePie();
                 }
                 obj.puedeUsarPunio();
             }
@@ -604,7 +604,7 @@ void Jugador::restart()
     m_knockbackDuracion = 0.f;
     m_knockbackTime = 0.f;
 
-    Depie();/**Pone al jugador en estado QUIETO (de pie)*/
+    obj.DePie();/**Pone al jugador en estado QUIETO (de pie)*/
 
     obj.setSaltando(true);/**Marca que está en salto para que la lógica lo haga caer al suelo*/
 
@@ -655,24 +655,6 @@ void Jugador::Golpeado()
 
         m_tiempoGolpeado = m_clock.getElapsedTime().asSeconds();/**Guarda el instante del golpe para medir por cuánto tiempo se
                                                                 mantiene la reacción*/
-    }
-}
-void Jugador::Agachar()
-{
-    if (obj.actual() != Estado::AGACHADO)/**si no esta agachado*/
-    {
-        setEstado(Estado::AGACHADO);/**setea el estado agachado*/
-    }
-    obj.setAgachado(true);/**activa el agachado*/
-    obj.setIsDePie(false);/**y vuelve false el depie/quieto*/
-}
-void Jugador::Depie()
-{
-    if (!obj.isDePie())/**si no esta depie/quieto*/
-    {
-        obj.setIsDePie(true);/**activa el depie/quieto*/
-        obj.setAgachado(false);/**vuelve false el agachado, ya que no peude estar de pie y a su vez estar agachado*/
-        setEstado(Estado::QUIETO);/**setea el estado quieto*/
     }
 }
 void Jugador::Morir()

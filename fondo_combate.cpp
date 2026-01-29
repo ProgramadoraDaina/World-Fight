@@ -73,7 +73,7 @@ void Fondo_combate::setFondoCombate(sf::View& camara)
                                                                      quede centrado verticalmente*/
 
     // Capa 1, medio lejana
-    if (tipo == 1)/**si el escenario/estado es el tipo 1*/
+    if (tipo == 1) /**si el escenario/estado es el tipo 1*/
     {
         if (!tex[1].loadFromFile("sprites/dojo/arboles.png"))/**entonces voy a configurar la capa 1 con la textura de arboles*/
         {

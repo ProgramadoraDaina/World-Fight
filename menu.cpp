@@ -122,7 +122,7 @@ void Menu::ProcessEvents(Juego &juego, Event &event)   // Maneja eventos del men
     {
         if (event.key.code == sf::Keyboard::Enter || event.key.code == sf::Keyboard::Space)
         {
-       switch (i)
+            switch (i)
             {
             case 0:
                 juego.SetFondo(new Selector()); // Cambia a la escena de selección de personajes
@@ -189,3 +189,4 @@ void Menu::Draw(RenderWindow &window)  // Dibuja el menu
     window.draw(m_t3);                 // Dibuja texto del botón 3
     window.display();                  // Muestra todo en pantalla
 }
+

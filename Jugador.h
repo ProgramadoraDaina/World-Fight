@@ -87,8 +87,7 @@ public:
     void SetDeltaTime(sf::Time deltaTime);
     void ValidateScreenLimits();
     void Golpeado();
-    void Agachar();
-    void Depie();
+    //void Agachar();
     void Morir();
     void Correr();
     void Celebrar();
@@ -118,4 +117,3 @@ void setEstado(Estado estado);
 void agregarAnimacion(Estado estado, const std::vector<std::string>& rutas);
 
 };
-

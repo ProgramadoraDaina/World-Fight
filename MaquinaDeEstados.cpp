@@ -1,4 +1,3 @@
-
 #include "MaquinaDeEstados.h"
 
 // ====== ctor ======
@@ -7,9 +6,9 @@ MaquinaDeEstados::MaquinaDeEstados() = default;
 // ====== estado actual ======
 void MaquinaDeEstados::cambiar(Estado e)
 {
-    // --- BLOQUEO: si estoy en ATACAR_* y el lock está activo, NO aceptar cambios de estado ---
+    // --- BLOQUEO: si estoy en ATACAR_* y el lock estÃ¡ activo, NO aceptar cambios de estado ---
     if (m_lockAtaque && estado_ == m_estadoBloqueado) {
-        // Acepto sólo permanecer en el mismo estado (avanza animación) o re-entrar al mismo
+        // Acepto sÃ³lo permanecer en el mismo estado (avanza animaciÃ³n) o re-entrar al mismo
         if (e != m_estadoBloqueado) {
             return; // rechazo cualquier intento de salir de ATACAR_PUNIO/PATADA
         }
@@ -93,7 +92,7 @@ void MaquinaDeEstados::iniciarShokeado(float segundos)
 
 void MaquinaDeEstados::actualizarTimers(float dt)
 {
-    // cooldown del puño
+    // cooldown del puÃ±o
     if (m_punioCooldownRestante > 0.f) {
         m_punioCooldownRestante -= dt;
         if (m_punioCooldownRestante <= 0.f) {
@@ -121,4 +120,38 @@ void MaquinaDeEstados::cancelarGolpeado()
         cambiar(Estado::QUIETO);
         m_isDePie = true;
     }
+}
+void MaquinaDeEstados::DePie()
+{
+    // Si hay lock de ataque activo y el estado bloqueado es un ATACAR_*,
+    // no dejamos salir (la propia cambiar(e) lo valida, pero lo chequeamos
+    // aquÃ­ para evitar tocar flags incoherentes).
+    if (m_lockAtaque && estado_ == m_estadoBloqueado) {
+        return;
+    }
+
+    // Si ya estÃ¡ de pie, no hacemos trabajo extra
+    if (m_isDePie) {
+        return;
+    }
+
+    // Ajuste de flags coherentes al "de pie"
+    m_isDePie = true;
+    m_Agachado = false;   // No puede estar agachado y de pie a la vez
+
+    // Pedido de cambio de estado a QUIETO (usarÃ¡ la misma puerta de entrada)
+    cambiar(Estado::QUIETO);
+}
+
+void MaquinaDeEstados::agacharse()
+{
+    if (m_lockAtaque && estado_ == m_estadoBloqueado) {
+        return;
+    }
+
+    if (estado_ != Estado::AGACHADO) {
+        cambiar(Estado::AGACHADO);
+    }
+    m_Agachado = true;
+    m_isDePie = false;
 }
