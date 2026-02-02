@@ -73,7 +73,7 @@ void Fondo_combate::setFondoCombate(sf::View& camara)
                                                                      quede centrado verticalmente*/
 
     // Capa 1, medio lejana
-    if (tipo == 1) /**si el escenario/estado es el tipo 1*/
+    if (tipo == 1)/**si el escenario/estado es el tipo 1*/
     {
         if (!tex[1].loadFromFile("sprites/dojo/arboles.png"))/**entonces voy a configurar la capa 1 con la textura de arboles*/
         {
@@ -171,10 +171,10 @@ void Fondo_combate::setFondoCombate(sf::View& camara)
     suelo.setFillColor(sf::Color(0,0,0,0));
     float bordeInferiorDojo = capasAtras[2].getGlobalBounds().top + capasAtras[2].getGlobalBounds().height;
     float alturaSuelo = capasAtras[3].getGlobalBounds().height;
-    suelo.setPosition(-escenarioAncho*0.12, bordeInferiorDojo - alturaSuelo);
+    suelo.setPosition(-escenarioAncho*0.12, bordeInferiorDojo - alturaSuelo - (alturaSuelo * 0.9f));
     if (tipo == 2)
     {
-        suelo.setPosition(-escenarioAncho*0.12, bordeInferiorDojo - alturaSuelo * 0.5);
+        suelo.setPosition(-escenarioAncho*0.12, bordeInferiorDojo - alturaSuelo * 0.7);
     }
     /// Capa 0 de las texturas Delanteras(sobre los jugadores) decorativo
     if (tipo == 1)

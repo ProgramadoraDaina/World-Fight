@@ -53,15 +53,21 @@ void ParametroSprites::configurar(const std::string& nombre,
     hitbox.setOutlineThickness(2.f);
 }
 
+int ParametroSprites::direccionHorizontal(const sf::Sprite& sprite) const {
+    const float sx = sprite.getScale().x;
+    if (sx > 0.0f)  return -1; // izquierda
+    if (sx < 0.0f)  return +1; // derecha
+    return +1;
+}
 void ParametroSprites::aplicarDireccion(const std::string& nombre, sf::Sprite& sprite, bool izquierda) {
-    const float escalaGlobalY = 1.1f;
+    const float escalaGlobalY = 1.4f;
     float escalaX = 1.0f;
 
     if (nombre == "Camila") {
-        escalaX = 0.8f;
+        escalaX = 0.9f;
     }
     else if (nombre == "Ryu" || nombre == "Moon" || nombre == "Joseph") {
-        escalaX = 1.0f;
+        escalaX = 1.3f;
     }
 
     // Si izquierda = true → positivo (mira a la izquierda)
@@ -77,12 +83,14 @@ bool ParametroSprites::miraDerecha(const sf::Sprite& sprite) const {
     return sprite.getScale().x < 0.0f;
 }
 
-int ParametroSprites::getDireccion(const sf::Sprite& sprite) const {
+int ParametroSprites::signoKnockback(const sf::Sprite& sprite) const {
     const float sx = sprite.getScale().x;
-    // +1 = empuje/dir hacia +X (considerado "mira izquierda" en tu lógica actual)
-    // -1 = empuje/dir hacia -X (considerado "mira derecha")
-    if (sx > 0.0f)  return +1;   // mira izquierda
-    if (sx < 0.0f)  return -1;   // mira derecha
-    // caso raro: sx == 0 → elegimos un default; podés ajustar si querés
-       return +1;
+
+    // Comportamiento viejo:
+    // Si el sprite mira a la IZQUIERDA (sx > 0), empuje hacia la DERECHA (+1).
+    // Si el sprite mira a la DERECHA (sx < 0), empuje hacia la IZQUIERDA (-1).
+    if (sx > 0.0f) return +1;  // scale.x positivo => empuje a la derecha
+    if (sx < 0.0f) return -1;  // scale.x negativo => empuje a la izquierda
+
+    return +1; // valor por defecto si sx == 0
 }

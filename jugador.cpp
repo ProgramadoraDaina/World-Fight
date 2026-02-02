@@ -5,6 +5,8 @@
 #include <SFML/Graphics.hpp>
 #include "ParametroSprites.h"
 #include "MaquinaDeEstados.h"
+#include "ControlesJugador.h"
+
 using namespace sf; // Permite usar clases y funciones sin prefijo (sf, std)
 using namespace std; // Permite usar clases y funciones sin prefijo (sf, std)
 
@@ -14,62 +16,41 @@ Jugador::Jugador(bool Jugador_uno, string name)
     rutas_.cargarPNGS(m_name, *this);/**cargo todas las texturas/frames de animación del personaje según su nombre,y las registro
                                      dentro de este Jugador (se usa Rutas.cpp)*/
 
-    setEstado(Estado::QUIETO);/** establezco el estado inicial del jugador en "QUIETO" y muestro su primer frame*/
-
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();/**obtengo la resolución de pantalla actual para calcular posiciones
                                                             y límites*/
     float escenarioAncho = desktop.width + desktop.width / 4;/**defino el ancho lógico del dojo (un poco mayor que el ancho del
                                                              monitor)*/
     float posicionX;/**creo una variable para calcular la X inicial del sprite*/
 
+    ParametroSprites configurador;/**creo el helper que sabe cómo escalar/orientar el sprite y configurar las cajas
+                                    (hurtbox/hitbox) según el personaje (m_name)*/
+
     // Posición inicial según jugador
     if (Jugador_uno) { /**si es el jugador 1*/
         posicionX = (escenarioAncho / 5) * 1.52f;/**lo ubico más a la izquierda del dojo*/
-        m_sprite.setPosition(posicionX, 300);/**coloco el sprite del jugador en (posicionX, 300) y la altura 300, asi aparecera
+        m_sprite.setPosition(posicionX, 0);/**coloco el sprite del jugador en (posicionX, 300) y la altura 300, asi aparecera
                                              en el aire y caerá*/
-        m_up = Keyboard::Key::W;
-        m_right = Keyboard::Key::D;
-        m_down = Keyboard::Key::S;
-        m_left = Keyboard::Key::A;/**asigno las teclas de movimiento del Jugador 1 (WASD)*/
-        m_ataquePatada = Keyboard::Key::F;/**la tecla de Ataque Patada para P1 es F*/
-        m_ataquePunio  = Keyboard::Key::Space;/**la tecla de Ataque Puño para P1 es Space*/
-
-    } else {/**como no es jugador 1 es jugador 2*/
+        controles.aplicarPreset(0);
+        configurador.aplicarDireccion(m_name, m_sprite, false);/**aplico orientación para que P1 mire a la derecha*/
+    }
+    else {/**como no es jugador 1 es jugador 2*/
         posicionX = (escenarioAncho / 5) * 3.4f;/**calculo la X inicial del Jugador 2 colocándolo hacia la derecha del dojo*/
-        m_sprite.setPosition(posicionX, 300);/**ubico el sprite del Jugador 2 en (posicionX, 300); también empezará en altura y
+        m_sprite.setPosition(posicionX, 0);/**ubico el sprite del Jugador 2 en (posicionX, 300); también empezará en altura y
                                              caerá por la física del juego*/
-        m_up = Keyboard::Key::Up;
-        m_right = Keyboard::Key::Right;
-        m_down = Keyboard::Key::Down;
-        m_left = Keyboard::Key::Left;/**asigno las teclas de movimiento del Jugador 2 (flechas del teclado)*/
-        m_ataquePatada = Keyboard::Key::K;/**la tecla de Ataque Patada para P2 es K*/
-        m_ataquePunio  = Keyboard::Key::I;/**la tecla de Ataque Puño para P2 es I*/
+        controles.aplicarPreset(1);
+        configurador.aplicarDireccion(m_name, m_sprite, true);/**aplico orientación para que P2 mire a la izquierda*/
     }
 
     // Pone el centro del sprite como origen
     m_sprite.setOrigin(m_sprite.getLocalBounds().width / 2.f, 0.f);/**posiciono el origen del m_sprite en el centro del
                                                                    eje x y arriba de la y*/
-    // ✅ Aplicar dirección inicial según jugador
-    ParametroSprites configurador;/**creo el helper que sabe cómo escalar/orientar el sprite y configurar las cajas
-                                    (hurtbox/hitbox) según el personaje (m_name)*/
-    if (jugador_uno) {
-        // Jugador 1 debe mirar a la DERECHA (scale.x negativo)
-        configurador.aplicarDireccion(m_name, m_sprite, false);/**aplico orientación para que P1 mire a la derecha*/
-    } else {
-        // Jugador 2 debe mirar a la IZQUIERDA (scale.x positivo)
-        configurador.aplicarDireccion(m_name, m_sprite, true);/**aplico orientación para que P2 mire a la izquierda*/
-    }
+
+
     // Variables iniciales
-    obj.setSaltando(true);/**arranco con la bandera de “saltando” activa; después se acomodará al tocar suelo
+    obj.EstadoInicial();/**arranco con la bandera de “saltando” activa; después se acomodará al tocar suelo
                       (tu lógica de caer/hurtbox con el suelo)*/
 
     m_SaltoSpeed = 0.0f;/**velocidad vertical inicial del salto (se actualizará por física)*/
-
-    obj.setAgachado(false);/**el jugador no está agachado al inicio*/
-
-    obj.setIsDePie(false);/**como aparece en el aire no esta depie/quieto*/
-
-    obj.setCanUsePunio(true);/**habilito el uso del ataque de Puño*/
 
     m_sePresionoAtacar = false;/**guardo si la tecla de patada estuvo presionada en el frame actual; sirve para detectar el
                                 “flanco” y evitar repeticiones mientras se mantiene pulsada*/
@@ -99,13 +80,7 @@ void Jugador::Update(Jugador& opponent)
     {
         ValidateScreenLimits();/**Primero, mantengo al jugador dentro de la pantalla con ValidateScreenLimits()*/
         {
-            bool anyKey =                      /**si cualquiera de mis teclas de control/ataque está presionada, anyKey es true*/
-                Keyboard::isKeyPressed(m_up) ||
-                Keyboard::isKeyPressed(m_down) ||
-                Keyboard::isKeyPressed(m_left) ||
-                Keyboard::isKeyPressed(m_right) ||
-                Keyboard::isKeyPressed(m_ataquePatada) ||
-                Keyboard::isKeyPressed(m_ataquePunio);
+            bool anyKey = controles.anyKey();
 
             float tiempoActual = m_clock.getElapsedTime().asSeconds();/**uso el tiempoActual en segundos para comparar duraciones
                                                                       de estados*/
@@ -157,7 +132,7 @@ void Jugador::Update(Jugador& opponent)
         if (!obj.shokeado())/**entramos si no estamos shokeados*/
         {
             // Iniciar salto
-            if (Keyboard::isKeyPressed(m_up) && !obj.saltando())/**si aprieto "arriba" y no estoy saltando, inicio salto
+            if (controles.arriba() && !obj.saltando())/**si aprieto "arriba" y no estoy saltando, inicio salto
                                                             con velocidad hacia arriba*/
             {
 
@@ -173,17 +148,10 @@ void Jugador::Update(Jugador& opponent)
                 m_sprite.move(0, m_SaltoSpeed);
                 m_SaltoSpeed += 0.7f;/**si esto es cero, el personaje no salta, y tampoco camina, pero si se mueve en x*/
             }
-            bool isAtaque_PunioPressed = Keyboard::isKeyPressed(m_ataquePunio);/**isAtaque_PunioPressed se vuelve true si el jugador 1 o 2
-                                                                             está presionando su tecla de ataque punio ya sea
-                                                                             k o f (punio)*/
-
-            bool isAtaque_PatadaPressed = Keyboard::isKeyPressed(m_ataquePatada);/**isAtaque_PatadaPressed se vuelve true si el jugador 1 o 2
-                                                                             está presionando su tecla de ataque patada ya sea
-                                                                             i o space (patada)*/
 
             if (!obj.estaAtacando())/**solo puedo iniciar un ataque si no estoy ya atacando*/
             {
-                if (isAtaque_PatadaPressed && !m_sePresionoAtacar &&(obj.isDePie() || obj.saltando() || obj.actual() == Estado::CORRIENDO) &&
+                if (controles.patada() && !m_sePresionoAtacar &&(obj.isDePie() || obj.saltando() || obj.actual() == Estado::CORRIENDO) &&
                         obj.actual() != Estado::ATACAR_PATADA)/**Si todas son verdad se ejecuta la patada.*/
                 {
                     obj.setEstaAtacando(true);
@@ -191,10 +159,10 @@ void Jugador::Update(Jugador& opponent)
                     obj.activarLockAtaquePara(Estado::ATACAR_PATADA);
                     Ataque_Patada(opponent);
                 }
-                m_sePresionoAtacar = isAtaque_PatadaPressed;/**guardo el estado actual de la tecla del ataque patada para comparar
+                m_sePresionoAtacar = controles.patada();/**guardo el estado actual de la tecla del ataque patada para comparar
                                                          en el siguiente frame*/
 
-                if (isAtaque_PunioPressed && !m_wasAtaque_PunioPressed &&
+                if (controles.punio() && !m_wasAtaque_PunioPressed &&
                         (obj.isDePie() || obj.saltando() || obj.actual() == Estado::CORRIENDO) &&
                         obj.actual() != Estado::ATACAR_PUNIO)/**si todas son verdad se ejecuta el ataque_punio*/
                 {
@@ -204,7 +172,7 @@ void Jugador::Update(Jugador& opponent)
                     Ataque_Punio(opponent);
                     obj.iniciarCooldownPunio(3.0f);
                 }
-                m_wasAtaque_PunioPressed = isAtaque_PunioPressed;/**guardo el estado actual de la tecla de puño para comparar
+                m_wasAtaque_PunioPressed = controles.punio();/**guardo el estado actual de la tecla de puño para comparar
                                                                   en el próximo frame*/
             }
 
@@ -214,7 +182,7 @@ void Jugador::Update(Jugador& opponent)
             ParametroSprites configurador;/** creo el configurador que ajusta la dirección (flip del sprite) según la
                                              orientación*/
 
-            if (Keyboard::isKeyPressed(m_left))/**ir a la izquierda*/
+            if (controles.izquierda())/**ir a la izquierda*/
             {
                 if (!obj.saltando() && !obj.estaAtacando())/**si NO estoy saltando y NO estoy atacando,lo pongoen  estado "CORRIENDO"*/
                 {
@@ -236,7 +204,7 @@ void Jugador::Update(Jugador& opponent)
                     }
                 }
             }
-            else if (Keyboard::isKeyPressed(m_right))/**ir a la izquierda*/
+            else if (controles.derecha())/**ir a la izquierda*/
             {
                 if (!obj.saltando() && !obj.estaAtacando())/**si NO estoy saltando y NO estoy atacando,lo pongo en  estado "CORRIENDO"*/
                 {
@@ -259,17 +227,15 @@ void Jugador::Update(Jugador& opponent)
             }
             else if (!obj.saltando())/**si no estoy saltando*/
             {
-                bool presionandoAtaque = Keyboard::isKeyPressed(m_ataquePatada) ||/**armo una bandera que vale true si el jugador*/
-                                         (jugador_uno ? Keyboard::isKeyPressed(Keyboard::Space)/**está apretando cualquier*/
-                                          : Keyboard::isKeyPressed(Keyboard::I));/**ataque: patada (F/K) o punio (Space/I)*/
-                if (Keyboard::isKeyPressed(m_down))/**si el jugador está apretando Abajo (m_down), pongo el estado AGACHADO*/
+                bool presionandoAtaque = controles.patada() || controles.punio();
+                if (controles.abajo())/**si el jugador está apretando Abajo (m_down), pongo el estado AGACHADO*/
                 {
-                    obj.agacharse();
+                    Agachar();
                 }
                 else if (!presionandoAtaque)/**si no estoy agachándome y no estoy apretando ningún ataque (patada/puño), me
                                             pongo de pie (QUIETO)*/
                 {
-                    obj.DePie();
+                    Depie();
                 }
                 obj.puedeUsarPunio();
             }
@@ -288,11 +254,8 @@ void Jugador::Update(Jugador& opponent)
                 obj.setIsDePie(true);
             }
         }
-
-        obj.iniciarCooldownPunio(3.0f);
-
         m_deltaTime = m_clock.getElapsedTime();/**Actualizo m_deltaTime para tener el tiempo actual disponible en otros
-                                                      métodos (por ejemplo, animación, físicas, etc.).*/
+                                                    métodos (por ejemplo, animación, físicas, etc.).*/
     }
 
     // Knockback continuo en MUERTE / CAYENDO
@@ -376,7 +339,7 @@ void Jugador::ubicarIndicador()
 
     const float centerX = gb.left + gb.width * 0.5f;/**Calculo el centro horizontal de la hurtbox*/
 
-    const float topY    = gb.top;/**Guardo la coordenada Y del borde superior de la hurtbox. Esto será mi referencia para
+    const float topY    = gb.top - gb.top * 0.1f;/**Guardo la coordenada Y del borde superior de la hurtbox. Esto será mi referencia para
                                   colocar el indicador arriba*/
 
     // Tamaño real del indicador con transformaciones aplicadas
@@ -596,15 +559,13 @@ void Jugador::restart()
     float posicionX;/**Variable temporal para calcular la posición X inicial del jugador*/
 
 /**Reset de estados*/
-    obj.setShokeado(false);
-    obj.setGolpeado(false);
-    obj.setCaidoMuerto(false);
+    obj.EstadoInicial();
     m_knockbackDirection = 0;
     m_knockbackImpacto = 0.f;
     m_knockbackDuracion = 0.f;
     m_knockbackTime = 0.f;
 
-    obj.DePie();/**Pone al jugador en estado QUIETO (de pie)*/
+    Depie();/**Pone al jugador en estado QUIETO (de pie)*/
 
     obj.setSaltando(true);/**Marca que está en salto para que la lógica lo haga caer al suelo*/
 
@@ -657,6 +618,24 @@ void Jugador::Golpeado()
                                                                 mantiene la reacción*/
     }
 }
+void Jugador::Agachar()
+{
+    if (obj.actual() != Estado::AGACHADO)/**si no esta agachado*/
+    {
+        setEstado(Estado::AGACHADO);/**setea el estado agachado*/
+    }
+    obj.setAgachado(true);/**activa el agachado*/
+    obj.setIsDePie(false);/**y vuelve false el depie/quieto*/
+}
+void Jugador::Depie()
+{
+    if (!obj.isDePie())/**si no esta depie/quieto*/
+    {
+        obj.setIsDePie(true);/**activa el depie/quieto*/
+        obj.setAgachado(false);/**vuelve false el agachado, ya que no peude estar de pie y a su vez estar agachado*/
+        setEstado(Estado::QUIETO);/**setea el estado quieto*/
+    }
+}
 void Jugador::Morir()
 {
     if (obj.actual() != Estado::MUERTE)/**entra en muerte si no esta ya muerto*/
@@ -665,17 +644,10 @@ void Jugador::Morir()
         obj.setIsDePie(false);/**vuelve false los demas estados*/
         obj.setAgachado(false);
         obj.setSaltando(false);
-        sf::Vector2f scale = m_sprite.getScale();/** Lee la escala actual del sprite para saber hacia qué lado está orientado
-                                                 (flip horizontal)*/
 
-        if (scale.x > 0)/**Si el sprite mira a la izquierda (scale.x positivo)*/
-        {
-            m_knockbackDirection = 1;/**el retroceso empuja hacia la derecha (+X*/
-        }
-        else if (scale.x < 0)/**si el sprite mira a la derecha*/
-        {
-            m_knockbackDirection = -1;/**el retroceso empuja hacia la izquierda*/
-        }
+        ParametroSprites configurador;
+        m_knockbackDirection = configurador.signoKnockback(m_sprite);
+
         m_knockbackImpacto = 80.f;/**Define la intensidad base del empuje horizontal durante la muerte*/
         m_knockbackDuracion = 5.5f;/**Duración en cantidad de frames del knockback*/
         m_knockbackTime = 0.f;/**Reinicia el progreso del knockback para empezar desde cero*/
@@ -691,16 +663,9 @@ void Jugador::Caer()
         obj.setAgachado(false);
         obj.setSaltando(false);
 
-        sf::Vector2f scale = m_sprite.getScale();/**Lee la escala del sprite para conocer la orientación horizontal (flip X)*/
+        ParametroSprites configurador;
+        m_knockbackDirection = configurador.signoKnockback(m_sprite);
 
-        if (scale.x > 0)/**si el sprite mira a la izquierda*/
-        {
-            m_knockbackDirection = 1;/**el empuje de la caída va hacia la derecha (+X)*/
-        }
-        else if (scale.x < 0)/**si el sprite mira a la derecha*/
-        {
-            m_knockbackDirection = -1;/**el empuje va hacia la izquierda (−X)*/
-        }
         m_knockbackImpacto = 80.f;/**Define la intensidad base del empuje horizontal durante la caida*/
         m_knockbackDuracion = 5.5f;/**Duración en cantidad de frames del knockback*/
         m_knockbackTime = 0.f;/**Reinicia el progreso del knockback para empezar desde cero*/

@@ -14,7 +14,7 @@ public:
     void ProcessEvents(); // Procesa los eventos (clicks, teclas presionadas, soltadas, etc.)
     void Update(); // Actualiza
     void Draw(); // Dibuja
-    void SetFondo(Fondo* Siguiente_Fondo); // Metodo para cambiar de escena
+    void SetFondo(Fondo *siguiente_escena); // Metodo para cambiar de escena
     void Exit();
 
 	const RenderWindow &GetWindow();
@@ -27,6 +27,7 @@ public:
 private:
     RenderWindow m_window;
     Fondo *m_fondo; // escena actual
+    Fondo *m_siguiente_fondo = nullptr; // escena siguiente
 
  int rachaJugador1 = 0;
     int rachaJugador2 = 0;

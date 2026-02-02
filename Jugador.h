@@ -10,6 +10,8 @@
 #include <SFML/Graphics.hpp>
 #include <map>
 #include "MaquinaDeEstados.h"
+#include "ControlesJugador.h"
+
 using namespace sf;
 using namespace std;
 
@@ -19,6 +21,8 @@ class Jugador : public Objeto
 {
 private:
     MaquinaDeEstados obj;
+    ControlesJugador controles;
+
     bool jugador_uno; // Indica si es el jugador 1 o el 2
     float lastScoreTime = 0.0f;
     string nombre;
@@ -87,7 +91,8 @@ public:
     void SetDeltaTime(sf::Time deltaTime);
     void ValidateScreenLimits();
     void Golpeado();
-    //void Agachar();
+    void Agachar();
+    void Depie();
     void Morir();
     void Correr();
     void Celebrar();
@@ -117,3 +122,4 @@ void setEstado(Estado estado);
 void agregarAnimacion(Estado estado, const std::vector<std::string>& rutas);
 
 };
+

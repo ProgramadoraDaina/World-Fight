@@ -93,7 +93,7 @@ Archivo::Archivo(std::string fnombre, int GanadorPuntos, bool puedeGuardar)
         m_t4.setString("Presiona ENTER para guardar");
         m_t4.setCharacterSize(static_cast<unsigned>(8 * uiScale));
         m_t4.setFillColor(sf::Color(255, 255, 255, 0));
-        m_t4.setPosition(30.f * uiScale, 300.f * uiScale);
+        m_t4.setPosition(30.f * uiScale, 220.f * uiScale);
 
         m_t5.setFont(m_f1);
         m_t5.setString(std::to_string(GanadorPuntos) + " puntos");
@@ -242,7 +242,7 @@ void Archivo::ProcessEvents(Juego &juego, sf::Event &event)
         if (boton1.getGlobalBounds().contains(mousePos))
         {
             SaveDataToFile(m_filename);
-            juego.SetFondo(new Menu());
+            juego.SetFondo(new Menu);
         }
     }
     else if (event.type == sf::Event::KeyPressed)
@@ -250,7 +250,7 @@ void Archivo::ProcessEvents(Juego &juego, sf::Event &event)
         if (event.key.code == sf::Keyboard::Escape)
         {
             SaveDataToFile(m_filename);
-            juego.SetFondo(new Menu());
+            juego.SetFondo(new Menu);
         }
     }
 }
@@ -452,4 +452,3 @@ void Archivo::SetGanador(const string& nombre, int id)
     nombreGanador = nombre;
     ganadorID = id;
 }
-

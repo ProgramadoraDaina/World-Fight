@@ -3,7 +3,7 @@
 #include <SFML/System/Time.hpp>     // Para manejar tiempo con SFML
 #include <cmath>                    // Para usar std::round
 #include <iostream>                 // Para depuración en consola
-using namespace std;
+
 Reloj::Reloj() {}                 // Constructor por defecto (no hace nada)
 
 // Constructor: recibe el tiempo que descontará el cronómetro en minutos

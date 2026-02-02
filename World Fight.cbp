@@ -55,6 +55,8 @@
 		<Unit filename="Combate.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="ControlesJugador.cpp" />
+		<Unit filename="ControlesJugador.h" />
 		<Unit filename="Instrucciones.cpp" />
 		<Unit filename="Instrucciones.h" />
 		<Unit filename="Juego.cpp" />
